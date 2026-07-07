@@ -1,0 +1,12 @@
+{
+  "name": "treendly-trend-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A local trend research dashboard with a Treendly API proxy.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
