@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>趋势雷达</title>
+    <link rel="stylesheet" href="/styles.css?v=20260707-source-status">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="side-nav" aria-label="趋势雷达导航">
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M4 16.5c4.2-1.2 5.4-8.1 9.6-8.1 2.8 0 4.2 2.1 6.4 2.1" />
+              <path d="M4 19.5c5.2-1.4 6.1-6.5 9.4-6.5 2.4 0 3.7 1.5 6.6 1.5" />
+              <circle cx="14" cy="8.4" r="1.7" />
+            </svg>
+          </span>
+          <span>
+            <strong>趋势雷达</strong>
+            <small>多平台验证台</small>
+          </span>
+        </a>
+
+        <nav class="nav-list">
+          <a class="active" href="#research">关键词研究</a>
+          <a href="#compare">机会洞察</a>
+          <a href="#sources">趋势验证</a>
+          <a href="#holidays">真实词库</a>
+          <a href="#raw">原始数据</a>
+        </nav>
+
+        <div class="api-status" id="apiStatus">
+          <span class="status-dot"></span>
+          <span>正在检查接口</span>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <h1>趋势雷达</h1>
+            <p>输入一个关键词，综合 Google、Amazon、TikTok、YouTube、Pinterest 等平台信号做交叉验证。</p>
+          </div>
+          <a class="doc-link" href="#sources">打开验证入口</a>
+        </header>
+
+        <section class="control-strip" id="research" aria-label="关键词研究控件">
+          <label class="field field-wide">
+            <span>关键词</span>
+            <input id="termInput" value="candle holder wreath" autocomplete="off">
+          </label>
+
+          <label class="field">
+            <span>地区</span>
+            <select id="geoInput">
+              <option value="US">US</option>
+              <option value="GB">GB</option>
+              <option value="CA">CA</option>
+              <option value="AU">AU</option>
+              <option value="DE">DE</option>
+              <option value="FR">FR</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>时间范围</span>
+            <select id="viewInput">
+              <option value="1">近 1 年</option>
+              <option value="5">近 5 年</option>
+            </select>
+          </label>
+
+          <button class="primary-btn" id="searchBtn" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3" /><circle cx="11" cy="11" r="7" /></svg>
+            查询趋势
+          </button>
+        </section>
+
+        <section class="summary-grid" aria-label="趋势摘要">
+          <article class="metric-panel">
+            <span id="averageLabel">平均热度</span>
+            <strong id="averageMetric">--</strong>
+            <small id="averageNote">等待查询</small>
+          </article>
+          <article class="metric-panel">
+            <span id="growthLabel">增长幅度</span>
+            <strong id="growthMetric">--</strong>
+            <small id="growthNote">末值对比起始值</small>
+          </article>
+          <article class="metric-panel">
+            <span id="paceLabel">趋势节奏</span>
+            <strong id="paceMetric">--</strong>
+            <small id="paceNote">Treendly 分类</small>
+          </article>
+          <article class="metric-panel">
+            <span id="searchLabel">搜索需求</span>
+            <strong id="searchMetric">--</strong>
+            <small id="searchNote">月均搜索量</small>
+          </article>
+        </section>
+
+        <section class="season-panel" aria-label="近一年季节性判断" hidden>
+          <div class="panel-title compact">
+            <h2>近一年季节性</h2>
+            <p id="seasonalitySummary">按春夏秋冬拆分最近 12 个月走势，判断是否有明显季节波峰。</p>
+          </div>
+          <div class="season-grid" id="seasonalityGrid">
+            <div class="source-data-empty">等待趋势数据</div>
+          </div>
+        </section>
+
+        <section class="main-grid" hidden>
+          <article class="chart-panel">
+            <div class="panel-title">
+              <div>
+                <h2 id="chartTitle">趋势曲线</h2>
+                <p id="chartSubtitle">正在加载趋势数据</p>
+              </div>
+              <span id="modeBadge" class="mode-badge">未接入</span>
+            </div>
+            <div class="chart-frame">
+              <svg id="trendChart" viewBox="0 0 760 320" role="img" aria-label="趋势图"></svg>
+            </div>
+          </article>
+
+        </section>
+
+        <section class="source-panel verification-panel" id="sources" aria-label="趋势验证入口">
+          <div class="panel-title compact">
+            <h2>趋势验证入口</h2>
+            <p>点击后自动带当前关键词打开对应平台验证，不需要再手动输入关键词。</p>
+          </div>
+          <div class="source-list verification-list" id="sourceLinks"></div>
+        </section>
+
+        <section class="platform-heat-panel" aria-label="不同平台真实推荐热度对比">
+          <div class="panel-title compact">
+            <h2>不同平台热度对比</h2>
+            <p>只统计实时返回推荐词的平台；这是推荐词信号指数，不等同于官方搜索量。</p>
+          </div>
+          <div class="platform-heat-grid" id="platformHeatGrid">
+            <div class="source-data-empty">等待真实平台推荐词</div>
+          </div>
+        </section>
+
+        <section class="source-data-panel" aria-label="美国站真实来源数据">
+          <div class="panel-title compact">
+            <h2>美国站真实来源</h2>
+            <p>绿色为实时抓取，黄色为需要人工验证，蓝色为已人工验证后重新收集。</p>
+          </div>
+          <div class="source-data-grid" id="sourceDataGrid">
+            <div class="source-data-empty">等待查询来源数据</div>
+          </div>
+        </section>
+
+        <section class="lower-grid">
+          <article class="related-panel">
+            <div class="panel-title compact">
+              <h2>实时推荐词汇总</h2>
+              <p>只汇总实时来源返回的搜索/购物推荐词；趋势曲线未接入时不展示。</p>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>渠道</th>
+                  <th>关键词</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="relatedRows"></tbody>
+            </table>
+          </article>
+
+          <article class="compare-panel insight-panel" id="compare">
+            <div class="panel-title compact">
+              <h2>机会洞察</h2>
+              <p>基于多平台实时推荐词，预测高意图关键词、人群和使用场景。</p>
+            </div>
+            <textarea id="compareInput" placeholder="可选：输入你想额外观察的词，用英文逗号分隔"></textarea>
+            <button class="secondary-btn" id="compareBtn" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5" /><path d="M4 19h16" /><path d="M8 15l3-4 3 2 4-7" /></svg>
+              生成洞察
+            </button>
+            <div class="compare-list insight-list" id="compareList"></div>
+          </article>
+        </section>
+
+        <section class="holiday-panel" id="holidays" aria-label="美国站真实推荐词库">
+          <div class="panel-title compact">
+            <h2>美国站真实推荐词库</h2>
+            <p>按大类目、小类目、细分词三级分析美国节日/购物季推荐词；只用实时返回推荐词的来源计分，社媒和趋势入口仅用于复核。</p>
+          </div>
+          <div class="holiday-grid" id="holidayKeywordGrid">
+            <div class="source-data-empty">等待收集节日推荐词</div>
+          </div>
+        </section>
+
+        <section class="raw-panel" id="raw">
+          <button class="raw-toggle" id="rawToggle" type="button">
+            <span>原始数据 JSON</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+          </button>
+          <pre id="rawJson" hidden>{}</pre>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js?v=20260707-source-status"></script>
+  </body>
+</html>
