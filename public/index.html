@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>趋势雷达</title>
-    <link rel="stylesheet" href="/styles.css?v=20260707-source-status">
+    <link rel="stylesheet" href="/styles.css?v=20260707-guide">
   </head>
   <body>
     <div class="app-shell">
@@ -27,8 +27,10 @@
           <a class="active" href="#research">关键词研究</a>
           <a href="#compare">机会洞察</a>
           <a href="#sources">趋势验证</a>
+          <a href="#theme-extension">场景延伸</a>
           <a href="#holidays">真实词库</a>
           <a href="#raw">原始数据</a>
+          <a href="#guide">使用说明</a>
         </nav>
 
         <div class="api-status" id="apiStatus">
@@ -155,6 +157,16 @@
           </div>
         </section>
 
+        <section class="theme-extension-panel" id="theme-extension" aria-label="主题场景延伸推荐">
+          <div class="panel-title compact">
+            <h2>主题场景延伸</h2>
+            <p>根据当前关键词和不同平台返回的推荐词，延伸出可继续验证的相关搜索方向。</p>
+          </div>
+          <div class="theme-extension-grid" id="themeExpansionGrid">
+            <div class="source-data-empty">等待多平台推荐词，生成主题延伸...</div>
+          </div>
+        </section>
+
         <section class="lower-grid">
           <article class="related-panel">
             <div class="panel-title compact">
@@ -204,9 +216,54 @@
           </button>
           <pre id="rawJson" hidden>{}</pre>
         </section>
+
+        <section class="guide-panel" id="guide" aria-label="使用与评分说明">
+          <div class="panel-title compact">
+            <h2>使用与评分说明</h2>
+            <p>本工具用于关键词方向判断和跨平台复核，评分是推荐词信号指数，不等同于官方搜索量。</p>
+          </div>
+          <div class="guide-grid">
+            <article class="guide-card">
+              <h3>使用步骤</h3>
+              <ol>
+                <li>输入英文关键词，地区优先选择 US。</li>
+                <li>先看不同平台热度对比，判断哪些平台有真实推荐词。</li>
+                <li>再看主题场景延伸和机会洞察，挑出可继续验证的细分方向。</li>
+                <li>点击趋势验证入口，到 Google Trends、Pinterest、TikTok、Amazon 等平台人工复核。</li>
+              </ol>
+            </article>
+            <article class="guide-card">
+              <h3>评分口径</h3>
+              <ul>
+                <li>0-100 分为站内推荐词信号指数。</li>
+                <li>分数来自实时推荐词数量、相关度、排名靠前程度和购买意图词。</li>
+                <li>多个平台同时出现的词，会获得更高参考权重。</li>
+                <li>仅人工验证入口不参与自动评分。</li>
+              </ul>
+            </article>
+            <article class="guide-card">
+              <h3>颜色说明</h3>
+              <div class="legend-list">
+                <span><i class="legend-live"></i>绿色：实时抓取 / 平台已出现</span>
+                <span><i class="legend-manual"></i>黄色：仅人工验证</span>
+                <span><i class="legend-blocked"></i>红色：当前被平台限制</span>
+                <span><i class="legend-watch"></i>灰蓝：主题延伸 / 建议验证</span>
+              </div>
+            </article>
+            <article class="guide-card">
+              <h3>可靠性说明</h3>
+              <ul>
+                <li>Google、Amazon、TikTok、YouTube 等推荐词优先作为自动信号。</li>
+                <li>Google Trends 和 Pinterest Trends 可作为强复核入口，但不稳定时不混入评分。</li>
+                <li>趋势、季节性和热度结论应以多平台交叉验证为准。</li>
+                <li>最终选品前建议打开验证入口逐个平台确认。</li>
+              </ul>
+            </article>
+          </div>
+        </section>
       </main>
     </div>
 
-    <script src="/app.js?v=20260707-source-status"></script>
+    <script src="/app.js?v=20260707-guide"></script>
   </body>
 </html>
