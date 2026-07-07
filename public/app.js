@@ -41,6 +41,7 @@ const seasonalitySummary = document.querySelector("#seasonalitySummary");
 const holidayKeywordGrid = document.querySelector("#holidayKeywordGrid");
 const relatedRows = document.querySelector("#relatedRows");
 const compareList = document.querySelector("#compareList");
+const themeExpansionGrid = document.querySelector("#themeExpansionGrid");
 
 function compactNumber(value) {
   const number = Number(value) || 0;
@@ -461,6 +462,192 @@ function evidenceFor(signals, patterns, limit = 3) {
     .map((item) => item.keyword);
 }
 
+const CHRISTMAS_THEME_GROUPS = [
+  {
+    label: "圣诞装饰",
+    scene: "树饰 / 挂件 / 家居摆件",
+    patterns: [/christmas|holiday|decor|decoration|ornament|tree|garland/i],
+    seeds: ["christmas decorations", "christmas decor", "christmas tree decorations", "christmas ornaments", "christmas garland"]
+  },
+  {
+    label: "圣诞花环",
+    scene: "门饰 / 桌面 / 蜡烛中心装饰",
+    patterns: [/wreath|garland|centerpiece|candle|holder|door/i],
+    seeds: ["christmas wreath", "christmas wreath for front door", "christmas candle holder wreath", "christmas table centerpiece", "christmas garland with lights"]
+  },
+  {
+    label: "人物角色",
+    scene: "圣诞老人 / 雪人 / 驯鹿 / 胡桃夹子",
+    patterns: [/santa|snowman|reindeer|nutcracker|elf|gnome/i],
+    seeds: ["santa claus decorations", "snowman christmas decorations", "reindeer christmas decorations", "nutcracker christmas decorations", "christmas gnome decorations"]
+  },
+  {
+    label: "空间场景",
+    scene: "户外 / 门廊 / 壁炉 / 餐桌",
+    patterns: [/outdoor|porch|front door|mantel|fireplace|table|yard|window/i],
+    seeds: ["outdoor christmas decorations", "christmas porch decorations", "front door christmas decor", "christmas mantel decor", "christmas table decor"]
+  },
+  {
+    label: "礼品派对",
+    scene: "送礼 / 包装 / 聚会 / 套装",
+    patterns: [/gift|party|stocking|wrap|set|pack|bulk|basket/i],
+    seeds: ["christmas party decorations", "christmas gift wrap", "christmas stocking stuffers", "christmas ornament set", "christmas gift basket"]
+  },
+  {
+    label: "风格材质",
+    scene: "灯串 / 农舍 / 复古 / 红绿配色",
+    patterns: [/led|light|lights|rustic|farmhouse|vintage|red|green|aesthetic/i],
+    seeds: ["lighted christmas decorations", "led christmas wreath", "rustic christmas decor", "farmhouse christmas decor", "vintage christmas decorations"]
+  }
+];
+
+function isChristmasLikeTerm(term) {
+  return /christmas|xmas|holiday|santa|wreath|ornament|garland|nutcracker|snowman|reindeer/i.test(String(term || ""));
+}
+
+function genericThemeGroups(term) {
+  const base = String(term || "holiday decor").trim() || "holiday decor";
+  return [
+    {
+      label: "核心搜索",
+      scene: "主词 / 同义词 / 购买词",
+      patterns: [new RegExp(base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), /buy|shop|best|ideas/i],
+      seeds: [`${base} ideas`, `${base} decor`, `${base} amazon`, `${base} best`, `${base} set`]
+    },
+    {
+      label: "场景空间",
+      scene: "户外 / 桌面 / 门口 / 家居",
+      patterns: [/outdoor|indoor|table|door|porch|home|room|wall/i],
+      seeds: [`outdoor ${base}`, `${base} for table`, `${base} for front door`, `${base} for home`, `${base} wall decor`]
+    },
+    {
+      label: "风格人群",
+      scene: "审美 / 礼品 / DIY / 家庭",
+      patterns: [/aesthetic|gift|diy|craft|family|kids|women|men/i],
+      seeds: [`${base} aesthetic`, `${base} gift`, `${base} diy`, `${base} craft`, `${base} for family`]
+    }
+  ];
+}
+
+function keywordOverlapScore(a, b) {
+  const aWords = String(a || "").toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length > 2);
+  const bText = String(b || "").toLowerCase();
+  if (!aWords.length || !bText) return 0;
+  return aWords.filter((word) => bText.includes(word)).length;
+}
+
+function matchingSignalsForKeyword(signals, keyword) {
+  const key = String(keyword || "").toLowerCase();
+  return signals.filter((signal) => {
+    const text = String(signal.keyword || "").toLowerCase();
+    return text === key || text.includes(key) || key.includes(text) || keywordOverlapScore(keyword, text) >= 2;
+  });
+}
+
+function themeTermFromSignal(signal, group) {
+  return group.patterns.some((pattern) => pattern.test(signal.keyword));
+}
+
+function buildThemeExpansions(data) {
+  const baseTerm = data?.term || termInput.value.trim() || "christmas";
+  const geo = data?.geo || geoInput.value || "US";
+  const signals = collectLiveKeywordSignals(data);
+  const groups = isChristmasLikeTerm(baseTerm) ? CHRISTMAS_THEME_GROUPS : genericThemeGroups(baseTerm);
+
+  return {
+    baseTerm,
+    platformCount: (data?.sources || []).filter((source) => source.status === "live").length,
+    groups: groups.map((group, groupIndex) => {
+      const candidateMap = new Map();
+      group.seeds.forEach((seed, seedIndex) => {
+        candidateMap.set(seed.toLowerCase(), {
+          keyword: seed,
+          seedRank: seedIndex,
+          source: "seed"
+        });
+      });
+      signals
+        .filter((signal) => themeTermFromSignal(signal, group))
+        .slice(0, 8)
+        .forEach((signal, signalIndex) => {
+          const key = signal.keyword.toLowerCase();
+          if (!candidateMap.has(key)) {
+            candidateMap.set(key, {
+              keyword: signal.keyword,
+              seedRank: signalIndex,
+              source: "live"
+            });
+          }
+        });
+
+      const items = Array.from(candidateMap.values()).map((candidate) => {
+        const matches = matchingSignalsForKeyword(signals, candidate.keyword);
+        const sourceSet = new Set(matches.flatMap((match) => match.sources || []));
+        const bestSignal = matches.sort((a, b) => b.heat - a.heat)[0];
+        const score = bestSignal
+          ? Math.min(100, Math.round(bestSignal.heat + sourceSet.size * 4))
+          : Math.max(38, 64 - groupIndex * 3 - candidate.seedRank * 4);
+        return {
+          keyword: candidate.keyword,
+          score,
+          sourceCount: sourceSet.size,
+          sources: Array.from(sourceSet).slice(0, 4),
+          evidenceType: sourceSet.size ? "平台信号" : "主题延伸",
+          url: termActionUrl(candidate.keyword, geo)
+        };
+      }).sort((a, b) => b.score - a.score || b.sourceCount - a.sourceCount || a.keyword.localeCompare(b.keyword));
+
+      return {
+        label: group.label,
+        scene: group.scene,
+        items: items.slice(0, 6)
+      };
+    })
+  };
+}
+
+function renderThemeLoading() {
+  if (!themeExpansionGrid) return;
+  themeExpansionGrid.innerHTML = `<div class="source-data-empty">正在结合多平台推荐词生成主题场景延伸...</div>`;
+}
+
+function renderThemeExpansions(data = state.sourceCheck) {
+  if (!themeExpansionGrid) return;
+  if (!data) {
+    renderThemeLoading();
+    return;
+  }
+
+  const expansion = buildThemeExpansions(data);
+  themeExpansionGrid.innerHTML = `
+    <section class="theme-extension-summary">
+      <strong>${escapeHtml(expansion.baseTerm)}</strong>
+      <span>${expansion.platformCount} 个实时平台参与判断；绿色为平台已出现，灰色为主题延伸。</span>
+    </section>
+    ${expansion.groups.map((group) => `
+      <article class="theme-extension-card">
+        <div class="theme-extension-head">
+          <strong>${escapeHtml(group.label)}</strong>
+          <span>${escapeHtml(group.scene)}</span>
+        </div>
+        <ul class="theme-extension-list">
+          ${group.items.map((item) => `
+            <li class="${item.sourceCount ? "has-signal" : ""}">
+              <a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(item.keyword)}</a>
+              <div class="theme-extension-meta">
+                <span>${item.score}/100</span>
+                <em>${escapeHtml(item.evidenceType)}</em>
+              </div>
+              <div class="theme-extension-bar"><span style="width:${Math.max(8, Math.min(100, item.score))}%"></span></div>
+              <small>${escapeHtml(item.sources.length ? item.sources.map((source) => source.replace("推荐词", "").replace("搜索框", "").trim()).join(" / ") : "建议跳转验证")}</small>
+            </li>
+          `).join("")}
+        </ul>
+      </article>
+    `).join("")}
+  `;
+}
+
 function buildOpportunityInsights(data, manualTerms = "") {
   const signals = collectLiveKeywordSignals(data);
   const manualSignals = manualTerms
@@ -808,6 +995,7 @@ function renderSourceLoading() {
   sourceDataGrid.innerHTML = `<div class="source-data-empty">正在抓取 Google、Amazon、TikTok 等美国站来源...</div>`;
   renderPlatformLoading();
   renderRecommendationLoading();
+  renderThemeLoading();
   renderInsightLoading();
 }
 
@@ -1000,11 +1188,15 @@ async function runSourceCheck(term, geo) {
     renderSources(data);
     renderPlatformHeat(data);
     renderLiveRecommendations(data);
+    renderThemeExpansions(data);
     renderOpportunityInsights(data);
   } catch (error) {
     sourceDataGrid.innerHTML = `<div class="source-data-empty">来源数据抓取失败：${escapeHtml(error.message)}</div>`;
     if (platformHeatGrid) {
       platformHeatGrid.innerHTML = `<div class="source-data-empty">平台热度计算失败：${escapeHtml(error.message)}</div>`;
+    }
+    if (themeExpansionGrid) {
+      themeExpansionGrid.innerHTML = `<div class="source-data-empty">主题延伸生成失败：${escapeHtml(error.message)}</div>`;
     }
     compareList.innerHTML = `<div class="source-data-empty">机会洞察生成失败：${escapeHtml(error.message)}</div>`;
     relatedRows.innerHTML = `
