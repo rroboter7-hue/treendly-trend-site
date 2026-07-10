@@ -4,7 +4,10 @@
   "private": true,
   "description": "A local trend research dashboard with a Treendly API proxy.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check": "node --check server.js && node --check public/app.js && node --check cloudflare/worker.mjs",
+    "cloudflare:deploy": "wrangler deploy",
+    "cloudflare:migrate": "wrangler d1 migrations apply trend-radar-db --remote"
   },
   "engines": {
     "node": ">=18"
