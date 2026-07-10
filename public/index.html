@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>趋势雷达</title>
-    <link rel="stylesheet" href="/styles.css?v=20260707-guide">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/styles.css?v=20260710-manual-trend-review-v3">
   </head>
   <body>
     <div class="app-shell">
@@ -24,13 +25,24 @@
         </a>
 
         <nav class="nav-list">
-          <a class="active" href="#research">关键词研究</a>
-          <a href="#compare">机会洞察</a>
-          <a href="#sources">趋势验证</a>
-          <a href="#theme-extension">场景延伸</a>
-          <a href="#holidays">真实词库</a>
-          <a href="#raw">原始数据</a>
-          <a href="#guide">使用说明</a>
+          <div class="nav-primary">
+            <a class="active" href="#research">查询</a>
+            <a href="#compare">机会</a>
+            <a href="#sources">证据</a>
+            <a href="#report">报告</a>
+          </div>
+          <div class="nav-secondary" aria-label="二级页面">
+            <span>更多</span>
+            <a href="#hot-discovery">热词发现</a>
+            <a href="#social-radar">社媒雷达</a>
+            <a href="#keyword-demand">需求信号</a>
+            <a href="#platform-workbench">采集工作台</a>
+            <a href="#theme-extension">场景延伸</a>
+            <a href="#holidays">真实词库</a>
+            <a href="#cloud-history">云端历史库</a>
+            <a href="#source-audit">来源审计</a>
+            <a href="#guide">使用说明</a>
+          </div>
         </nav>
 
         <div class="api-status" id="apiStatus">
@@ -43,15 +55,18 @@
         <header class="topbar">
           <div>
             <h1>趋势雷达</h1>
-            <p>输入一个关键词，综合 Google、Amazon、TikTok、YouTube、Pinterest 等平台信号做交叉验证。</p>
+            <p>输入一个关键词，快速判断自动采集、登录验证、人工复核和可接入平台。</p>
           </div>
-          <a class="doc-link" href="#sources">打开验证入口</a>
+          <div class="topbar-actions">
+            <span class="version-pill">v20260710-manual-trend-review-v3</span>
+            <a class="doc-link" href="#report">导出报告</a>
+          </div>
         </header>
 
         <section class="control-strip" id="research" aria-label="关键词研究控件">
           <label class="field field-wide">
             <span>关键词</span>
-            <input id="termInput" value="candle holder wreath" autocomplete="off">
+            <input id="termInput" placeholder="输入关键词，例如 christmas wreath / winter pet home" autocomplete="off">
           </label>
 
           <label class="field">
@@ -66,7 +81,7 @@
             </select>
           </label>
 
-          <label class="field">
+          <label class="field field-time">
             <span>时间范围</span>
             <select id="viewInput">
               <option value="1">近 1 年</option>
@@ -76,18 +91,27 @@
 
           <button class="primary-btn" id="searchBtn" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3" /><circle cx="11" cy="11" r="7" /></svg>
-            查询趋势
+            生成报告
           </button>
+        </section>
+
+        <section class="trend-guard-panel" id="trendGuardPanel" aria-label="平台自动采集保护">
+          <div>
+            <span class="guard-label" id="trendGuardState">平台采集保护</span>
+            <strong id="trendGuardCountdown">等待查询</strong>
+            <p id="trendGuardAdvice">系统会按平台限制自动读取频率，避免频繁请求导致限流或验证。</p>
+          </div>
+          <a id="trendGuardLink" href="https://trends.google.com/trends/" target="_blank" rel="noreferrer" data-open-external="https://trends.google.com/trends/">打开 Trends</a>
         </section>
 
         <section class="summary-grid" aria-label="趋势摘要">
           <article class="metric-panel">
-            <span id="averageLabel">平均热度</span>
+            <span id="averageLabel">推荐词信号指数</span>
             <strong id="averageMetric">--</strong>
             <small id="averageNote">等待查询</small>
           </article>
           <article class="metric-panel">
-            <span id="growthLabel">增长幅度</span>
+            <span id="growthLabel">趋势历史信号</span>
             <strong id="growthMetric">--</strong>
             <small id="growthNote">末值对比起始值</small>
           </article>
@@ -97,10 +121,40 @@
             <small id="paceNote">Treendly 分类</small>
           </article>
           <article class="metric-panel">
-            <span id="searchLabel">搜索需求</span>
+            <span id="searchLabel">人工复核</span>
             <strong id="searchMetric">--</strong>
-            <small id="searchNote">月均搜索量</small>
+            <small id="searchNote">不是搜索量或销量</small>
           </article>
+        </section>
+
+        <section class="report-panel" id="report" aria-label="中文选品报告">
+          <div class="panel-title compact">
+            <h2>报告</h2>
+            <p>用真实推荐词、云端历史和人工复核记录生成中文选品报告；趋势曲线未接入时不会显示空图。</p>
+          </div>
+          <div class="report-grid" id="reportGrid">
+            <div class="source-data-empty">输入关键词后生成报告，并提供 Markdown / PDF 导出。</div>
+          </div>
+        </section>
+
+        <section class="hot-discovery-panel" id="hot-discovery" aria-label="跨平台热词发现">
+          <div class="panel-title compact">
+            <h2>跨平台热词发现</h2>
+            <p>输入任何宽词后自动扩展到美国站公开推荐词来源；默认走通用热词方向，遇到节日、装饰、宠物、礼品、游戏等词再自适应扩展场景。</p>
+          </div>
+          <div class="hot-discovery-grid" id="hotDiscoveryGrid">
+            <div class="source-data-empty">等待输入关键词后自动发现相关热词。</div>
+          </div>
+        </section>
+
+        <section class="social-radar-panel" id="social-radar" aria-label="社媒关注与未来机会雷达">
+          <div class="panel-title compact">
+            <h2>社媒关注雷达</h2>
+            <p>把公开推荐词、社媒搜索、社区讨论和未来 6 个月美国节日/季节/生活场景窗口拆开看；自动抓不到的平台只做登录复核入口，不参与评分。</p>
+          </div>
+          <div class="social-radar-grid" id="socialRadarGrid">
+            <div class="source-data-empty">等待输入关键词后生成社媒平台关注建议、当下热点和未来节日机会。</div>
+          </div>
         </section>
 
         <section class="season-panel" aria-label="近一年季节性判断" hidden>
@@ -110,6 +164,26 @@
           </div>
           <div class="season-grid" id="seasonalityGrid">
             <div class="source-data-empty">等待趋势数据</div>
+          </div>
+        </section>
+
+        <section class="workbench-panel" id="platform-workbench" aria-label="平台采集工作台">
+          <div class="panel-title compact">
+            <h2>平台采集工作台</h2>
+            <p>把平台分为自动采集、登录验证、人工复核和建议接入；只让可靠推荐词进入评分。</p>
+          </div>
+          <div class="workbench-grid" id="platformWorkbenchGrid">
+            <div class="source-data-empty">等待关键词查询，生成平台采集状态...</div>
+          </div>
+        </section>
+
+        <section class="signal-panel" aria-label="关键词结果分类">
+          <div class="panel-title compact">
+            <h2>关键词结果分类</h2>
+            <p>把实时推荐词按搜索需求、电商货架、社媒内容和场景人群拆开，方便判断下一步验证方向。</p>
+          </div>
+          <div class="signal-grid" id="signalTaxonomyGrid">
+            <div class="source-data-empty">等待实时推荐词分类...</div>
           </div>
         </section>
 
@@ -137,23 +211,53 @@
           <div class="source-list verification-list" id="sourceLinks"></div>
         </section>
 
-        <section class="platform-heat-panel" aria-label="不同平台真实推荐热度对比">
+        <section class="platform-heat-panel" aria-label="不同平台推荐词信号对比">
           <div class="panel-title compact">
-            <h2>不同平台热度对比</h2>
-            <p>只统计实时返回推荐词的平台；这是推荐词信号指数，不等同于官方搜索量。</p>
+            <h2>不同平台推荐词信号对比</h2>
+            <p>只统计实时返回推荐词的平台；推荐词 ≠ 搜索量 ≠ 销量。</p>
           </div>
           <div class="platform-heat-grid" id="platformHeatGrid">
             <div class="source-data-empty">等待真实平台推荐词</div>
           </div>
         </section>
 
-        <section class="source-data-panel" aria-label="美国站真实来源数据">
+        <section class="keyword-demand-panel" id="keyword-demand" aria-label="热门关键词多平台需求信号">
           <div class="panel-title compact">
-            <h2>美国站真实来源</h2>
-            <p>绿色为实时抓取，黄色为需要人工验证，蓝色为已人工验证后重新收集。</p>
+            <h2 id="keywordDemandTitle">热门词多平台需求信号</h2>
+            <p id="keywordDemandSubtitle">点击页面里的任意关键词后，先看站内证据链，再打开官方平台复核。</p>
+          </div>
+          <div class="keyword-demand-grid" id="keywordDemandGrid">
+            <div class="source-data-empty">点击任意关键词，查看不同平台的真实需求信号。</div>
+          </div>
+        </section>
+
+        <section class="source-data-panel" aria-label="来源证据链">
+          <div class="panel-title compact">
+            <h2>来源证据链</h2>
+            <p>每个来源标注来源类型、时间范围、采集时间、是否参与评分和原始链接。</p>
           </div>
           <div class="source-data-grid" id="sourceDataGrid">
             <div class="source-data-empty">等待查询来源数据</div>
+          </div>
+        </section>
+
+        <section class="source-audit-panel" id="source-audit" aria-label="数据可信度审计">
+          <div class="panel-title compact">
+            <h2>数据可信度审计</h2>
+            <p>集中说明哪些来源进入评分、哪些仅用于人工复核，以及当前系统的可信边界。</p>
+          </div>
+          <div class="source-audit-grid" id="sourceAuditGrid">
+            <div class="source-data-empty">等待来源数据，生成可信度审计...</div>
+          </div>
+        </section>
+
+        <section class="cloud-history-panel" id="cloud-history" aria-label="云端历史证据库">
+          <div class="panel-title compact">
+            <h2>云端历史库</h2>
+            <p>D1 接入后会保存每次采集、关键词快照、证据链、人工复核和周报；本地模式只显示连接状态。</p>
+          </div>
+          <div class="cloud-history-grid" id="cloudHistoryGrid">
+            <div class="source-data-empty">正在检查云端 D1 状态...</div>
           </div>
         </section>
 
@@ -187,8 +291,8 @@
 
           <article class="compare-panel insight-panel" id="compare">
             <div class="panel-title compact">
-              <h2>机会洞察</h2>
-              <p>基于多平台实时推荐词，预测高意图关键词、人群和使用场景。</p>
+              <h2>选品机会建议</h2>
+              <p>不是预测销量；这里把实时推荐词拆成高意图词、可能人群、使用场景和下一步验证动作。</p>
             </div>
             <textarea id="compareInput" placeholder="可选：输入你想额外观察的词，用英文逗号分隔"></textarea>
             <button class="secondary-btn" id="compareBtn" type="button">
@@ -209,54 +313,66 @@
           </div>
         </section>
 
-        <section class="raw-panel" id="raw">
-          <button class="raw-toggle" id="rawToggle" type="button">
-            <span>原始数据 JSON</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-          </button>
-          <pre id="rawJson" hidden>{}</pre>
-        </section>
-
         <section class="guide-panel" id="guide" aria-label="使用与评分说明">
           <div class="panel-title compact">
             <h2>使用与评分说明</h2>
-            <p>本工具用于关键词方向判断和跨平台复核，评分是推荐词信号指数，不等同于官方搜索量。</p>
+            <p>一句话原则：站内只计算真实返回的推荐词信号；趋势、社媒和电商页面用来交叉复核，不制造演示数据。</p>
           </div>
           <div class="guide-grid">
             <article class="guide-card">
-              <h3>使用步骤</h3>
+              <h3>怎么用</h3>
               <ol>
-                <li>输入英文关键词，地区优先选择 US。</li>
-                <li>先看不同平台热度对比，判断哪些平台有真实推荐词。</li>
-                <li>再看主题场景延伸和机会洞察，挑出可继续验证的细分方向。</li>
-                <li>点击趋势验证入口，到 Google Trends、Pinterest、TikTok、Amazon 等平台人工复核。</li>
+                <li>先输入大词，例如 Christmas、summer bbq、pet home。</li>
+                <li>看热词发现，找平台共同出现的具体词。</li>
+                <li>点任意关键词，站内会展开多平台需求信号。</li>
+                <li>需要确认季节性时，再打开 Google Trends、Pinterest、TikTok 等入口复核。</li>
               </ol>
             </article>
             <article class="guide-card">
-              <h3>评分口径</h3>
+              <h3>怎么交叉验证</h3>
               <ul>
-                <li>0-100 分为站内推荐词信号指数。</li>
-                <li>分数来自实时推荐词数量、相关度、排名靠前程度和购买意图词。</li>
-                <li>多个平台同时出现的词，会获得更高参考权重。</li>
-                <li>仅人工验证入口不参与自动评分。</li>
+                <li>同一个词同时出现在搜索、电商、视觉或内容平台，可信度更高。</li>
+                <li>Google Trends 主要看季节峰值和长期走势。</li>
+                <li>Pinterest / Images 主要看视觉风格和场景表达。</li>
+                <li>Amazon / Shopping / eBay 主要确认购物需求和规格词。</li>
               </ul>
             </article>
             <article class="guide-card">
-              <h3>颜色说明</h3>
+              <h3>怎么发现新思路</h3>
+              <ul>
+                <li>从大类词开始，让系统自动拆成产品、颜色、材质、场景和人群。</li>
+                <li>优先看“产品词 + 使用场景 + 材质/颜色”的组合。</li>
+                <li>遇到节日词时，看未来 6 个月是否有相容节日或生活场景。</li>
+                <li>把高分词拿到平台复核，确认是否真有内容和商品供给。</li>
+              </ul>
+            </article>
+            <article class="guide-card">
+              <h3>评分和颜色</h3>
               <div class="legend-list">
                 <span><i class="legend-live"></i>绿色：实时抓取 / 平台已出现</span>
                 <span><i class="legend-manual"></i>黄色：仅人工验证</span>
                 <span><i class="legend-blocked"></i>红色：当前被平台限制</span>
-                <span><i class="legend-watch"></i>灰蓝：主题延伸 / 建议验证</span>
+                <span><i class="legend-watch"></i>灰蓝：建议接入 / 待验证</span>
               </div>
             </article>
             <article class="guide-card">
-              <h3>可靠性说明</h3>
+              <h3>可信等级</h3>
               <ul>
-                <li>Google、Amazon、TikTok、YouTube 等推荐词优先作为自动信号。</li>
-                <li>Google Trends 和 Pinterest Trends 可作为强复核入口，但不稳定时不混入评分。</li>
-                <li>趋势、季节性和热度结论应以多平台交叉验证为准。</li>
-                <li>最终选品前建议打开验证入口逐个平台确认。</li>
+                <li>A 级：趋势历史 + 购物 + 社媒/视觉 + 3 个以上平台。</li>
+                <li>B 级：至少 2 个平台，且有购物或内容平台支持。</li>
+                <li>C 级：单平台线索，进入观察池，不直接当选品建议。</li>
+                <li>D/E 级：人工入口、受限、无结果或不可判断。</li>
+              </ul>
+            </article>
+            <article class="guide-card">
+              <h3>真实边界</h3>
+              <ul>
+                <li>推荐词 ≠ 搜索量 ≠ 销量。</li>
+                <li>不是官方搜索量，也不是销量。</li>
+                <li>登录页只能采集你当前可见内容。</li>
+                <li>没有原始链接、采集时间或证据链，不参与评分。</li>
+                <li>受限平台会进入冷却，不会继续硬刷。</li>
+                <li>最终选品结论要看趋势、供给、价格带和评论痛点。</li>
               </ul>
             </article>
           </div>
@@ -264,6 +380,7 @@
       </main>
     </div>
 
-    <script src="/app.js?v=20260707-guide"></script>
+    <script src="/config.js?v=20260710-manual-trend-review-v3"></script>
+    <script src="/app.js?v=20260710-manual-trend-review-v3"></script>
   </body>
 </html>
